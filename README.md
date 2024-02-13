@@ -12,7 +12,7 @@ void inject(Context context, @Nullable C carrier, TextMapSetter<C> setter);
 ```
 The inject method is a key component in this process. It allows you to inject trace context into a carrier, such as HTTP headers or messaging system properties, facilitating context propagation.
 
-* context: OpenTelemetry context containing trace context information.
+* context: OpenTelemetry context containing trace context information. ex (Traceparent: 00-0123456789abcdef0123456789abcdef-0123456789abcdef-01)
 * carrier: Carrier where the context information will be injected (e.g., HTTP headers, messaging system properties).
 * setter: Implementation of the TextMapSetter interface responsible for setting key-value pairs in the carrier.
 
