@@ -1,5 +1,9 @@
 # spring-boot-otel-txn-id
 
+3 type of instrumentation
+* Automatic Instrumentation
+* Automatic Instrumentation with Annotations
+* Manual Instrumentation
 
 
 
