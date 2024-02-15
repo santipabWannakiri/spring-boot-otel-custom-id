@@ -1,0 +1,81 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <include resource="co/elastic/logging/logback/boot/ecs-console-appender.xml"/>
+    <include resource="co/elastic/logging/logback/boot/ecs-file-appender.xml"/>
+    <property name="FILE_LOG_PATTERN" value="${FILE_LOG_PATTERN:-%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <property name="FILE_LOG_PATTERN_REQUEST_ID" value="${FILE_LOG_PATTERN_REQUEST_ID:-%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- $[%X{http.request.id}] --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <property name="LOG_PATH" value="${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}"/>
+    <property name="MAX_HISTORY" value="30"/>
+    <property name="MAX_SIZE" value="5MB"/>
+    <property name="ASYNC_QUEUE_SIZE" value="2000"/>
+    <property name="ASYNC_DISCARD_THRESHOLD" value="0"/>
+
+<!--    LOCAL_LOG_FILE-->
+    <appender name="LOCAL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/local.log</file>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN_REQUEST_ID}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/local.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <appender name="LOCAL_LOG" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${ASYNC_QUEUE_SIZE}</queueSize>
+        <discardingThreshold>${ASYNC_DISCARD_THRESHOLD}</discardingThreshold>
+        <appender-ref ref="LOCAL_FILE" />
+    </appender>
+
+<!--    ECS_LOG_APPENDER_FILE-->
+    <appender name="ECS_JSON_CUSTOM" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/ecs-json.json</file>
+        <encoder class="co.elastic.logging.logback.EcsEncoder"/>
+<!--        <encoder>-->
+<!--            <pattern>${FILE_LOG_PATTERN_REQUEST_ID}</pattern>-->
+<!--        </encoder>-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/ecs-json.%d{yyyy-MM-dd}.json</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <appender name="ASYNC_ECS_LOG_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${ASYNC_QUEUE_SIZE}</queueSize>
+        <discardingThreshold>${ASYNC_DISCARD_THRESHOLD}</discardingThreshold>
+        <appender-ref ref="ECS_JSON_CUSTOM" />
+    </appender>
+
+<!--    PAYLOAD_LOG_APPENDER_FILE-->
+    <appender name="PAYLOAD_LOG_APPENDER_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/payload.log</file>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN_REQUEST_ID}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/payload.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <appender name="PAYLOAD_LOG_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${ASYNC_QUEUE_SIZE}</queueSize>
+        <discardingThreshold>${ASYNC_DISCARD_THRESHOLD}</discardingThreshold>
+        <appender-ref ref="PAYLOAD_LOG_APPENDER_FILE" />
+    </appender>
+
+<!--LOGGER CONFIG-->
+    <logger name="com.order.service.configuration.ECSLoggingAspect" level="info" additivity="true">
+        <appender-ref ref="ASYNC_ECS_LOG_APPENDER"/>
+<!--        <appender-ref ref="ECS_JSON_FILE"/>-->
+    </logger>
+
+    <logger name="com.order.service.configuration.PayloadLoggingAspect" level="info" additivity="true">
+        <appender-ref ref="PAYLOAD_LOG_APPENDER"/>
+    </logger>
+
+    <root level="info">
+        <appender-ref ref="LOCAL_LOG"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
