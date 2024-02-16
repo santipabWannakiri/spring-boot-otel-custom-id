@@ -13,7 +13,7 @@ public final class Constants {
     //====== INTERNAL_SERVER_ERROR ======
     public static final String INTERNAL_ERROR_CODE = "6601";
     public static final String INTERNAL_MESSAGE_CODE = "FAILURE";
-   public static final String UNABLE_TO_PROCESS_MESSAGE = "Unable to process request. Please try again.";
+    public static final String UNABLE_TO_PROCESS_MESSAGE = "Unable to process request. Please try again.";
 
     //====== PRODUCT_NOT_FOUND ======
     public static final String PRODUCT_NOT_FOUND_ERROR_CODE = "6600";
@@ -37,4 +37,6 @@ public final class Constants {
 
     public static final String X_TRACE_ID = "traceId";
     public static final String X_REQUEST_ID = "requestId";
+
+    public static final String X_OTEL_CONTEXT = "otelContext";
 }

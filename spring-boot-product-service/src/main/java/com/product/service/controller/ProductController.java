@@ -5,8 +5,10 @@ import com.product.service.model.Product;
 import com.product.service.model.json.AppResponse;
 import com.product.service.model.json.QuantityRequest;
 import com.product.service.service.ProductService;
+import com.product.service.util.OpenTelemetryContextUtil;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
@@ -30,11 +32,6 @@ public class ProductController {
     private final OpenTelemetry openTelemetry;
     private final Tracer tracer;
     private final TextMapSetter<HttpHeaders> setter;
-    private static final ThreadLocal<Context> parentContexthreadLocal = new ThreadLocal<>();
-
-    public static void setContext(Context context) {
-        parentContexthreadLocal.set(context);
-    }
 
     @Autowired
     public ProductController(ProductService productService, OpenTelemetry openTelemetry, TextMapSetter<HttpHeaders> setter) {
@@ -56,10 +53,14 @@ public class ProductController {
 
     @GetMapping("/product/{id}")
     public ResponseEntity<?> getProductById(@PathVariable("id") int id) {
+        Context context = OpenTelemetryContextUtil.extractContextFromRequest();
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        Span getProductSpan = tracer.spanBuilder(methodName).setParent(parentContexthreadLocal.get()).setSpanKind(SpanKind.SERVER).startSpan();
+        Span getProductSpan = tracer.spanBuilder(methodName).setParent(context).setSpanKind(SpanKind.SERVER).startSpan();
         getProductSpan.setAttribute(SemanticAttributes.HTTP_METHOD, "GET");
         try (Scope scope = getProductSpan.makeCurrent()) {
+            SpanContext spanContext = getProductSpan.getSpanContext();
+            String traceId = spanContext != null ? spanContext.getTraceId() : "Unable get traceId";
+            System.out.println("Product - getProduct Trace ID : " + traceId);
             Optional<Product> result = Optional.ofNullable(productService.findById(id));
             if (result.isPresent()) {
                 return ResponseEntity.status(HttpStatus.OK).body(result.get());
@@ -102,10 +103,14 @@ public class ProductController {
 
     @PutMapping("/product/deduct/{PID}")
     public ResponseEntity<?> deductQuantity(@PathVariable("PID") int productId, @RequestBody QuantityRequest quantity) {
+        Context context = OpenTelemetryContextUtil.extractContextFromRequest();
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        Span deductSpan = tracer.spanBuilder(methodName).setParent(parentContexthreadLocal.get()).setSpanKind(SpanKind.SERVER).startSpan();
+        Span deductSpan = tracer.spanBuilder(methodName).setParent(context).setSpanKind(SpanKind.SERVER).startSpan();
         deductSpan.setAttribute(SemanticAttributes.HTTP_METHOD, "PUT");
         try (Scope scope = deductSpan.makeCurrent()) {
+            SpanContext spanContext = deductSpan.getSpanContext();
+            String traceId = spanContext != null ? spanContext.getTraceId() : "Unable get traceId";
+            System.out.println("Product - deductQuantity Trace ID : " + traceId);
             if (productService.deductQuantity(productId, quantity.getRequestedQuantity())) {
                 return new ResponseEntity<>(new AppResponse(Constants.DEDUCT_SUCCESS_MESSAGE), HttpStatus.OK);
             } else {

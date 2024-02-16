@@ -3,6 +3,7 @@ package com.product.service.configuraiton;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapSetter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
@@ -15,16 +16,18 @@ import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+
+import java.util.Collections;
 
 import static io.opentelemetry.semconv.ResourceAttributes.SERVICE_NAME;
 import static io.opentelemetry.semconv.ResourceAttributes.SERVICE_VERSION;
 
 @Configuration
 public class OtelConfiguration {
-
 
     @Bean
     public OpenTelemetry openTelemetry() {
@@ -57,7 +60,7 @@ public class OtelConfiguration {
     }
 
     @Bean
-    public TextMapSetter<HttpHeaders> myTextMapSetter() {
+    public TextMapSetter<HttpHeaders> TextMapSetter() {
         return new TextMapSetter<HttpHeaders>() {
             @Override
             public void set(HttpHeaders carrier, String key, String value) {
@@ -65,5 +68,21 @@ public class OtelConfiguration {
             }
         };
     }
+
+    @Bean
+    public TextMapGetter<HttpServletRequest> TextMapGetter() {
+        return new TextMapGetter<HttpServletRequest>() {
+            @Override
+            public Iterable<String> keys(HttpServletRequest carrier) {
+                return Collections.list(carrier.getHeaderNames());
+            }
+
+            @Override
+            public String get(HttpServletRequest carrier, String key) {
+                return carrier.getHeader(key);
+            }
+        };
+    }
+
 
 }
