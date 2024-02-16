@@ -10,12 +10,15 @@ import com.order.service.model.json.QuantityRequest;
 import com.order.service.repository.CartRepository;
 import com.order.service.repository.UserRepository;
 import com.order.service.service.CartService;
+import com.order.service.util.OpenTelemetryContextUtil;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapSetter;
 import io.opentelemetry.semconv.SemanticAttributes;
 import lombok.extern.slf4j.Slf4j;
@@ -43,14 +46,10 @@ public class CartServiceImpl implements CartService {
     private UserRepository userRepository;
     private final Tracer tracer;
     private final TextMapSetter<HttpHeaders> setter;
-    private static final ThreadLocal<Span> parentSpanThreadLocal = new ThreadLocal<>();
 
-    public static void setSpan(Span span) {
-        parentSpanThreadLocal.set(span);
-    }
 
     @Autowired
-    public CartServiceImpl(OpenTelemetry openTelemetry, RestTemplate restTemplate, CartRepository cartRepository, UserRepository userRepository, TextMapSetter<HttpHeaders> setter) {
+    public CartServiceImpl(OpenTelemetry openTelemetry, RestTemplate restTemplate, CartRepository cartRepository, UserRepository userRepository, TextMapSetter<HttpHeaders> setter, TextMapGetter<HttpHeaders> getter) {
         this.openTelemetry = openTelemetry;
         this.restTemplate = restTemplate;
         this.cartRepository = cartRepository;
@@ -60,10 +59,14 @@ public class CartServiceImpl implements CartService {
     }
 
     private boolean validateProductStatusAndQuantity(int productId, int quantity) {
+        Context context = OpenTelemetryContextUtil.extractContextFromRequest();
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        Span validateSpan = tracer.spanBuilder(methodName).setSpanKind(SpanKind.CLIENT).startSpan();
+        Span validateSpan = tracer.spanBuilder(methodName).setParent(context).setSpanKind(SpanKind.CLIENT).startSpan();
         validateSpan.setAttribute(SemanticAttributes.HTTP_METHOD, "GET");
         try (Scope scope = validateSpan.makeCurrent()) {
+            SpanContext spanContext = validateSpan.getSpanContext();
+            String traceId = spanContext != null ? spanContext.getTraceId() : "Unable get traceId";
+            System.out.println("Order - Validate = Trace ID : " + traceId);
             String productInfoEndpoint = endpoint + "/api/product/" + productId;
             HttpHeaders headers = new HttpHeaders();
             openTelemetry.getPropagators().getTextMapPropagator().inject(Context.current(), headers, setter);
@@ -121,10 +124,14 @@ public class CartServiceImpl implements CartService {
     }
 
     private boolean deductQuantity(int productId, int quantity) {
+        Context context = OpenTelemetryContextUtil.extractContextFromRequest();
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        Span deductSpan = tracer.spanBuilder(methodName).setSpanKind(SpanKind.CLIENT).startSpan();
+        Span deductSpan = tracer.spanBuilder(methodName).setParent(context).setSpanKind(SpanKind.CLIENT).startSpan();
         deductSpan.setAttribute(SemanticAttributes.HTTP_METHOD, "PUT");
         try (Scope scope = deductSpan.makeCurrent()) {
+            SpanContext spanContext = deductSpan.getSpanContext();
+            String traceId = spanContext != null ? spanContext.getTraceId() : "Unable get traceId";
+            System.out.println("Order - Deduct = Trace ID : " + traceId);
             String deductEndpoint = endpoint + "/api/product/deduct/" + productId;
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -152,8 +159,9 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public boolean addProduct(int productId, int quantity, String userName) {
+        Context context = OpenTelemetryContextUtil.extractContextFromRequest();
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        Span addProductSpan = tracer.spanBuilder(methodName).setSpanKind(SpanKind.INTERNAL).startSpan();
+        Span addProductSpan = tracer.spanBuilder(methodName).setParent(context).setSpanKind(SpanKind.INTERNAL).startSpan();
         addProductSpan.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
         try (Scope scope = addProductSpan.makeCurrent()) {
             String nowDate = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).toString();

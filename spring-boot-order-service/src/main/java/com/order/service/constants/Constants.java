@@ -47,4 +47,5 @@ public final class Constants {
     //====== Interceptor parameter ======
     public static final String X_TRACE_ID = "traceId";
     public static final String X_REQUEST_ID = "requestId";
+    public static final String X_OTEL_CONTEXT = "otelContext";
 }
