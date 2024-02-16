@@ -59,6 +59,14 @@ Common approaches:
 
 ---
 
+
+Considerations:
+Concurrency Requirements: If your application involves multi-threading or asynchronous operations, ThreadLocal might not be the most suitable choice unless managed with caution. Method arguments or dependency injection might offer better thread safety.
+
+Simplicity vs. Explicitness: ThreadLocal can simplify the code by avoiding explicit parameter passing, but it might make dependencies less visible compared to method arguments or dependency injection.
+
+Project Scale: For larger projects with complex dependency management requirements, dependency injection might provide a more scalable solution. For smaller projects, a simpler approach like method arguments or ThreadLocal might suffice.
+
 2. Context between services: This involves propagating context across network boundaries, typically between different microservices or components in a distributed system.
 * Crucial for tracing: Enables end-to-end tracing by ensuring all services involved in a request share the same tracing context.
 * Primary approach: Inject context into outgoing messages (e.g., HTTP headers, gRPC headers) using OpenTelemetry propagators.
