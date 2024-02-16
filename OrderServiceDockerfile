@@ -1,0 +1,7 @@
+FROM openjdk:17-jdk-slim-buster
+WORKDIR /app
+COPY /spring-boot-order-service/target/spring-boot-order-service-0.0.1-SNAPSHOT.jar /app/spring-boot-order-service-0.0.1-SNAPSHOT.jar
+COPY /spring-boot-order-service/src/main/resources/application.properties /app/application.properties
+RUN apt-get update && apt-get install -y curl jq
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/spring-boot-order-service-0.0.1-SNAPSHOT.jar"]

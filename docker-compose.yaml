@@ -1,0 +1,49 @@
+version: '4.0'
+networks:
+  otel-network:
+    driver: bridge
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - 4317:4317  # OTLP gRPC receiver
+      - 4318:4318  # OTLP http receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    depends_on:
+      - jaeger-service
+
+  jaeger-service:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - 16686:16686 #serve frontend
+      - 4317 # The default port for OTLP/gRPC is 4317: don't need to export for host (internal only)
+
+  spring-boot-product-service:
+    image: app/spring-boot-product-service
+    environment:
+    - OTEL_SERVICE_NAME=product-service
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    - OTEL_METRICS_EXPORTER=none
+    ports:
+      - 8081:8081
+    depends_on:
+      - otel-collector
+      - jaeger-service
+
+  spring-boot-order-service:
+    image: app/spring-boot-order-service
+    environment:
+      - OTEL_SERVICE_NAME=order-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_METRICS_EXPORTER=none
+      - PRODUCT_ENDPOINT_SERVICE=http://spring-boot-product-service:8081
+    ports:
+      - 8080:8080
+    depends_on:
+      - otel-collector
+      - jaeger-service
+      - spring-boot-product-service
