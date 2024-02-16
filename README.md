@@ -17,6 +17,18 @@ The inject method is a key component in this process. It allows you to inject tr
 * setter: Implementation of the TextMapSetter interface responsible for setting key-value pairs in the carrier.
 
 
+## Manage context
+When implementing OpenTelemetry (Otel) manually, there are 2 primary contexts to manage:
+
+1. Context between classes: This refers to sharing context within a single service, where different classes or methods might need access to the same tracing information.
+Common approaches:
+* Method arguments: Pass the context object as an argument to methods that require it.
+* ThreadLocal storage: Store the context in a thread-specific variable for access within methods of the same thread.
+* Dependency injection frameworks: Manage context as a bean and inject it into required classes.
+2. Context between services: This involves propagating context across network boundaries, typically between different microservices or components in a distributed system.
+* Crucial for tracing: Enables end-to-end tracing by ensuring all services involved in a request share the same tracing context.
+* Primary approach: Inject context into outgoing messages (e.g., HTTP headers, gRPC headers) using OpenTelemetry propagators.
+
 [Medium - Context Propagation in OpenTelemetry](https://medium.com/@danielbcorreia/context-propagation-in-opentelemetry-3f53ab31bcf5)\
 [Elastic - Manual instrumentation of Java applications with OpenTelemetry](https://www.elastic.co/blog/manual-instrumentation-of-java-applications-opentelemetry)\
 [Otel - Manual instrumentation for OpenTelemetry Java](https://opentelemetry.io/docs/languages/java/instrumentation/)\
