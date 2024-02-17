@@ -24,43 +24,26 @@ All of the steps above were ordered based on my experience, and most of them act
 Therefore, I'm going to focus on context management because it's really important and harder to understand how you will maintain context and pass it through the whole service.
 
 
-## Context Management Approaches
+## Context Management
 OpenTelemetry context (context) is a crucial component for distributed tracing and observability in microservices architectures. By passing the context through your service, you enable end-to-end tracing and ensure that contextual information is available for diagnostics and analysis. 
 
 When implementing OpenTelemetry (Otel) manually, there are 2 primary contexts to manage:
 * Context between classes and function
 * Context between services
 
-  
 
+## Context between classes and function approaches
+This refers to sharing context within a service, where different classes or methods might need access to the same tracing information.
 
-
-#### 1. Context between classes and function: This refers to sharing context within a single service, where different classes or methods might need access to the same tracing information.
 Common approaches:
-## 1. Method Arguments
+##### 1. Method Arguments : Pass the context object as an argument to methods that require it.
 
-**Description:** Pass the context object as an argument to methods that require it.
-
-**Pros:**
-- Explicit and modular, showing dependencies clearly in method signatures.
-- Improves testability as dependencies are explicitly provided.
-
-#### 2. ThreadLocal Storage
-
-**Description:** Store the context in a thread-specific variable for access within methods of the same thread.
-
-**Pros:**
-- Simplifies parameter passing, as the context is accessible within the same thread.
-- Well-suited for single-threaded or thread-local contexts.
+##### 2. ThreadLocal Storage : Store the context in a thread-specific variable for access within methods of the same thread.
 
 #### 3. Dependency Injection Frameworks
 
 **Description:** Manage context as a bean and inject it into required classes.
 
-**Pros:**
-- Centralized management of dependencies, promoting modularity.
-- Can simplify dependency handling, especially in larger applications.
-- Can be compatible with various frameworks that support dependency injection.
 
 | Approach               | Pros                                                                                                         | Cons                                                                                                              |
 |------------------------|--------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
