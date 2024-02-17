@@ -1,10 +1,13 @@
 # spring-boot-otel-txn-id
-
-3 type of instrumentation
+## Introduction
+To configure instrumentation for passing the context propgation, actually there are 3 way of difference at following
 * Automatic Instrumentation
 * Automatic Instrumentation with Annotations
 * Manual Instrumentation
 
+In my previous [spring-boot-otel-context-propagation](https://github.com/santipabWannakiri/spring-boot-otel-context-propagation) POC project, I provided an example of automatic instrumentation configuration. It's really straightforward. We just load the OTEL library and the initial command, including setting the OTEL collector enpoint as the parameter environment. Then all the things will operate automatically. However, when the default instrumentation provided by the libraries or frameworks you are using is not sufficient for our specific use case or if we want to capture additional information that is not automatically captured by the existing instrumentation, manual instrumentation is the answer. It provides the flexibility to adapt observability to the unique requirements of your application. 
+
+## Introduction
 
 
 ```java
