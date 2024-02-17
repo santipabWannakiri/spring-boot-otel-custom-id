@@ -12,7 +12,15 @@ To configure instrumentation for passing the context propgation, actually there 
 In my previous [spring-boot-otel-context-propagation](https://github.com/santipabWannakiri/spring-boot-otel-context-propagation) POC project, I provided an example of automatic instrumentation configuration. It's really straightforward. We just load the OTEL library and the initial command, including setting the OTEL collector enpoint as the parameter environment. Then all the things will operate automatically. However, when the default instrumentation provided by the libraries or frameworks you are using is not sufficient for our specific use case or if we want to capture additional information that is not automatically captured by the existing instrumentation, manual instrumentation is the answer. It provides the flexibility to adapt observability to the unique requirements of your application. 
 
 
-## Introduction
+## Manual Instrumentation
+As mentioned above, if default instrumentation is not sufficient or you want to capture something in deep detail, manual instrumentation is a solution. However, manual instrumentation is not easy to do. It's a really complex configuration, which I have summarized in the overview configuration step below:
+1.Dependency configuration
+2.OTEL Builder configuraion (Trace provider | Meter provider | Logger provider | Propagator)
+3.Acquiring a Tracer
+4.Creating Spans
+5.Context Management ( Context between classes and function | Context between services)
+
+
 
 
 ```java
