@@ -1,4 +1,3 @@
-<img width="806" alt="otel-overview" src="https://github.com/santipabWannakiri/spring-boot-otel-custom-id/assets/18206907/acf9d923-69a9-4148-ab76-c42a5518330e"># spring-boot-otel-txn-id
 ## Introduction
 To configure instrumentation for passing the context propgation, actually there are 3 way of difference at following
 * Automatic Instrumentation
