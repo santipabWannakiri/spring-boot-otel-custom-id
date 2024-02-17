@@ -13,28 +13,27 @@ In my previous [spring-boot-otel-context-propagation](https://github.com/santipa
 
 
 ## Manual Instrumentation
-As mentioned above, if default instrumentation is not sufficient or you want to capture something in deep detail, manual instrumentation is a solution. However, manual instrumentation is not easy to do. It's a really complex configuration, which I have summarized in the overview configuration step below:
-1.Dependency configuration
-2.OTEL Builder configuraion (Trace provider | Meter provider | Logger provider | Propagator)
-3.Acquiring a Tracer
-4.Creating Spans
+As mentioned above, if default instrumentation is not sufficient or you want to capture something in deep detail, manual instrumentation is a solution. However, manual instrumentation is not easy to do. It's a really complex configuration, which I have summarized in the overview configuration step below:\
+1.Dependency configuration\
+2.OTEL Builder configuraion (Trace provider | Meter provider | Logger provider | Propagator)\
+3.Acquiring a Tracer\
+4.Creating Spans\
 5.Context Management ( Context between classes and function | Context between services)
 
-
-
-
-```java
-void inject(Context context, @Nullable C carrier, TextMapSetter<C> setter);
-```
-The inject method is a key component in this process. It allows you to inject trace context into a carrier, such as HTTP headers or messaging system properties, facilitating context propagation.
-
-* context: OpenTelemetry context containing trace context information. ex (Traceparent: 00-0123456789abcdef0123456789abcdef-0123456789abcdef-01)
-* carrier: Carrier where the context information will be injected (e.g., HTTP headers, messaging system properties).
-* setter: Implementation of the TextMapSetter interface responsible for setting key-value pairs in the carrier.
+All of the steps above were ordered based on my experience, and most of them actually provide detailed configuration in the official OpenTelemetry document -> [Manual instrumentation for OpenTelemetry Java](https://opentelemetry.io/docs/languages/java/instrumentation/).\
+Therefore, I'm going to focus on context management because it's really important and harder to understand how you will maintain context and pass it through the whole service.
 
 
 ## Context Management Approaches
+OpenTelemetry context (context) is a crucial component for distributed tracing and observability in microservices architectures. By passing the context through your service, you enable end-to-end tracing and ensure that contextual information is available for diagnostics and analysis. 
+
 When implementing OpenTelemetry (Otel) manually, there are 2 primary contexts to manage:
+* Context between classes and function
+* Context between services
+
+  
+
+
 
 #### 1. Context between classes and function: This refers to sharing context within a single service, where different classes or methods might need access to the same tracing information.
 Common approaches:
@@ -86,6 +85,17 @@ Project Scale: For larger projects with complex dependency management requiremen
 2. Context between services: This involves propagating context across network boundaries, typically between different microservices or components in a distributed system.
 * Crucial for tracing: Enables end-to-end tracing by ensuring all services involved in a request share the same tracing context.
 * Primary approach: Inject context into outgoing messages (e.g., HTTP headers, gRPC headers) using OpenTelemetry propagators.
+
+```java
+void inject(Context context, @Nullable C carrier, TextMapSetter<C> setter);
+```
+The inject method is a key component in this process. It allows you to inject trace context into a carrier, such as HTTP headers or messaging system properties, facilitating context propagation.
+
+* context: OpenTelemetry context containing trace context information. ex (Traceparent: 00-0123456789abcdef0123456789abcdef-0123456789abcdef-01)
+* carrier: Carrier where the context information will be injected (e.g., HTTP headers, messaging system properties).
+* setter: Implementation of the TextMapSetter interface responsible for setting key-value pairs in the carrier.
+
+
 
 [Medium - Context Propagation in OpenTelemetry](https://medium.com/@danielbcorreia/context-propagation-in-opentelemetry-3f53ab31bcf5)\
 [Elastic - Manual instrumentation of Java applications with OpenTelemetry](https://www.elastic.co/blog/manual-instrumentation-of-java-applications-opentelemetry)\
