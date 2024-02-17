@@ -5,7 +5,7 @@ To configure instrumentation for passing the context propgation, actually there 
 * Manual Instrumentation
 
 <p align="center">
-  <img src="images/otel-overview.png" alt="image description" width="700" height="500">
+  <img src="images/otel-overview.png" alt="image description" width="600" height="400">
 </p>
 
 #### Automatic Instrumentation
