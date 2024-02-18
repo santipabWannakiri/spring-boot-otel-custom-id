@@ -128,33 +128,16 @@ Example configure Setter and Gtter as Bean
 
 
 
+#### To wrap up the consolidation of all concepts, the representation will look like the illustration below:
 <p align="center">
   <img src="images/ex-context-service.png" alt="image description" width="680" height="300">
 </p>
 
+To establish context between the Cart Service and Product Service, we will employ the `inject` and `extract` mechanisms as previously explained. After completing the extraction process, we will leverage the `HTTP attribute` concept to transmit the context to a class or function.
+
+The primary goal of passing context is to generate a trace ID for the entire transaction. This is particularly significant when integrating with visualization tools such as Jaeger, allowing us to observe the comprehensive process and analyze the time spent in each stage.
 
 
-
-
-Considerations:
-Concurrency Requirements: If your application involves multi-threading or asynchronous operations, ThreadLocal might not be the most suitable choice unless managed with caution. Method arguments or dependency injection might offer better thread safety.
-
-Simplicity vs. Explicitness: ThreadLocal can simplify the code by avoiding explicit parameter passing, but it might make dependencies less visible compared to method arguments or dependency injection.
-
-Project Scale: For larger projects with complex dependency management requirements, dependency injection might provide a more scalable solution. For smaller projects, a simpler approach like method arguments or ThreadLocal might suffice.
-
-2. Context between services: This involves propagating context across network boundaries, typically between different microservices or components in a distributed system.
-* Crucial for tracing: Enables end-to-end tracing by ensuring all services involved in a request share the same tracing context.
-* Primary approach: Inject context into outgoing messages (e.g., HTTP headers, gRPC headers) using OpenTelemetry propagators.
-
-```java
-void inject(Context context, @Nullable C carrier, TextMapSetter<C> setter);
-```
-The inject method is a key component in this process. It allows you to inject trace context into a carrier, such as HTTP headers or messaging system properties, facilitating context propagation.
-
-* context: OpenTelemetry context containing trace context information. ex (Traceparent: 00-0123456789abcdef0123456789abcdef-0123456789abcdef-01)
-* carrier: Carrier where the context information will be injected (e.g., HTTP headers, messaging system properties).
-* setter: Implementation of the TextMapSetter interface responsible for setting key-value pairs in the carrier.
 
 
 
