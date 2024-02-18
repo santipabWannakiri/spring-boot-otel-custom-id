@@ -40,7 +40,16 @@ Common approaches:
 
 ##### 2. ThreadLocal Storage : Store the context in a thread-specific variable for access within methods of the same thread.
 
-#### 3. Dependency Injection Frameworks
+##### 3.  HTTP Attribute : Use HTTP attributes to pass contextual information within the scope of an HTTP request.
+
+Above are all the approaches that I can imagine; however, each has pros and cons. For this POC, I decided to choose the HTTP attribute, whose details I'm going to provide detail at following:
+
+
+<p align="center">
+  <img src="images/ex-context-class-fucntion.png" alt="image description" width="600" height="400">
+</p>
+
+
 
 **Description:** Manage context as a bean and inject it into required classes.
 
