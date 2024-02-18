@@ -59,21 +59,76 @@ The illustration above provides the overall process of how it maintains context 
 
 `Service`: Implement business logic and perform operations requested by the controller.
 
+For the details of how to coding, I would like to suggest that you take a look inside the project in each class that mentioned the illustration above.
 
-**Description:** Manage context as a bean and inject it into required classes.
+
+## Context between services
+This involves propagating context information across service boundaries. When your application spans multiple services or microservices, you need to ensure that trace context is passed between them. This is crucial for creating end-to-end traces that cover the entire flow of a request across different components.
+
+Passing context between services is a crucial aspect of distributed tracing, and OpenTelemetry provides mechanisms to inject context, extract context, Propagators and Carriers for this purpose. Here's a brief explanation of how it works:
+
+##### Injecting Context:
+* When a service A initiates a request to service B, it needs to pass along the tracing context.
+* OpenTelemetry provides the TextMapPropagator interface, allowing you to inject context into various carriers, such as HTTP headers or any key-value pair structure.
+* The inject method is used to add trace information (e.g., trace ID, span ID) to the outgoing message (e.g., HTTP headers).
+
+ex.
+```java
+openTelemetry.getPropagators().getTextMapPropagator().inject(Context.current(), headers, setter);
+```
+
+##### Extracting Context:
+* When service B receives the request, it needs to extract the tracing context from the incoming message.
+* OpenTelemetry provides the TextMapPropagator interface with an extract method to retrieve the trace information from the incoming carrier.
+
+ex.
+```java
+ Context extractedContext = openTelemetry.getPropagators().getTextMapPropagator().extract(Context.current(), request, getter);
+```
+
+##### Propagators and Carriers:
+* TextMapPropagator:
+  * An interface defining methods for injecting and extracting trace context into/from carriers.
+  * Includes methods like inject and extract.
+* Carriers:
+  * Carriers are representations of the data transport mechanism used to pass context.
+  * Examples include HTTP headers, messaging system payloads, or any key-value pair structure.
+* Setter and Getter:
+  * Functional interfaces used to set and get values from the carrier.
+  * For HTTP headers, a Setter might set values in the headers, and a Getter might retrieve values from the headers.
+
+Example configure Setter and Gtter as Bean
+```java
+
+    @Bean
+    public TextMapSetter<HttpHeaders> TextMapSetter() {
+        return new TextMapSetter<HttpHeaders>() {
+            @Override
+            public void set(HttpHeaders carrier, String key, String value) {
+                carrier.set(key, value);
+            }
+        };
+    }
+
+    @Bean
+    public TextMapGetter<HttpServletRequest> TextMapGetter() {
+        return new TextMapGetter<HttpServletRequest>() {
+            @Override
+            public Iterable<String> keys(HttpServletRequest carrier) {
+                return Collections.list(carrier.getHeaderNames());
+            }
+            @Override
+            public String get(HttpServletRequest carrier, String key) {
+                return carrier.getHeader(key);
+            }
+        };
+    }
+
+```
 
 
-| Approach               | Pros                                                                                                         | Cons                                                                                                              |
-|------------------------|--------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
-| Method Arguments   | - Explicit Dependency: Clearly shows dependencies by passing the OTel context as an argument.                | - Parameter Passing Overhead: May lead to larger method signatures and require passing the context through all intermediate method calls.                                      |
-|                        | - Modularity: Enhances modularity, making methods independent of global state.                                |                                                                                                                    |
-|                        | - Testability: Improves testability as dependencies are explicitly provided.                                  |                                                                                                                    |
-| **ThreadLocal Storage**| - Simplified Parameter Passing: Simplifies parameter passing within the same thread.                          | - Limited to Single Thread: May not work well in multi-threaded scenarios without careful management.              |
-|                        | - Thread-Specific Access: Well-suited for single-threaded or thread-local contexts.                             | - Potential for Global State: If not managed properly, thread-local storage can introduce global state concerns.  |
-| **Dependency Injection Frameworks** | - Centralized Management: Promotes centralized management of dependencies, enhancing modularity.           | - Learning Curve: May introduce a learning curve, especially for developers unfamiliar with the specific dependency injection framework.                                           |
-|                        | - Simplified Dependency Handling: Can simplify dependency handling, especially in larger applications.         | - Potential for Global State: If not managed carefully, dependency injection frameworks can introduce global state concerns. |
 
----
+
 
 
 Considerations:
