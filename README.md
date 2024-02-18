@@ -46,7 +46,7 @@ Above are all the approaches that I can imagine; however, each has pros and cons
 
 
 <p align="center">
-  <img src="images/ex-context-class-fucntion.png" alt="image description" width="600" height="400">
+  <img src="images/ex-context-class-fucntion.png" alt="image description" width="680" height="300">
 </p>
 
 
