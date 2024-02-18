@@ -14,11 +14,11 @@ In my previous [spring-boot-otel-context-propagation](https://github.com/santipa
 
 ## Manual Instrumentation
 As mentioned above, if default instrumentation is not sufficient or you want to capture something in deep detail, manual instrumentation is a solution. However, manual instrumentation is not easy to do. It's a really complex configuration, which I have summarized in the overview configuration step below:\
-1.Dependency configuration\
-2.OTEL Builder configuraion (Trace provider | Meter provider | Logger provider | Propagator)\
-3.Acquiring a Tracer\
-4.Creating Spans\
-5.Context Management ( Context between classes and function | Context between services)
+`1.Dependency configuration`\
+`2.OTEL Builder configuraion` (Trace provider | Meter provider | Logger provider | Propagator)\
+`3.Acquiring a Tracer`\
+`4.Creating Spans`\
+`5.Context Management` ( Context between classes and function | Context between services)
 
 All of the steps above were ordered based on my experience, and most of them actually provide detailed configuration in the official OpenTelemetry document -> [Manual instrumentation for OpenTelemetry Java](https://opentelemetry.io/docs/languages/java/instrumentation/).\
 Therefore, I'm going to focus on context management because it's really important and harder to understand how you will maintain context and pass it through the whole service.
@@ -42,13 +42,22 @@ Common approaches:
 
 ##### 3.  HTTP Attribute : Use HTTP attributes to pass contextual information within the scope of an HTTP request.
 
-Above are all the approaches that I can imagine; however, each has pros and cons. For this POC, I decided to choose the HTTP attribute, whose details I'm going to provide detail at following:
+Above are all the approaches that I can imagine; however, each has pros and cons. For this POC, I decided to choose the `HTTP attribute`, whose details I'm going to provide detail at following:
 
 
 <p align="center">
   <img src="images/ex-context-class-fucntion.png" alt="image description" width="680" height="300">
 </p>
 
+The illustration above provides the overall process of how it maintains context and passes it through between the class and function, which each component can describe as follows:
+
+`Interceptor`: intercept and process the initial context, extract traceId etc. incoming HTTP requests before they reach the controller.
+
+`AOP logging`: cross-cutting concerns like logging, and it requires a trace id and a txn id for logging.
+
+`Controller`: Handle incoming HTTP requests and interact with the service layer.
+
+`Service`: Implement business logic and perform operations requested by the controller.
 
 
 **Description:** Manage context as a bean and inject it into required classes.
