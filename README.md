@@ -65,7 +65,7 @@ For the details of how to coding, I would like to suggest that you take a look i
 ## Context between services
 This involves propagating context information across service boundaries. When your application spans multiple services or microservices, you need to ensure that trace context is passed between them. This is crucial for creating end-to-end traces that cover the entire flow of a request across different components.
 
-Passing context between services is a crucial aspect of distributed tracing, and OpenTelemetry provides mechanisms to inject context, extract context, Propagators and Carriers for this purpose. Here's a brief explanation of how it works:
+Passing context between services is a crucial aspect of distributed tracing, and OpenTelemetry provides mechanisms to `inject context`, `extract context`, `Propagators` and `Carriers` for this purpose. Here's a brief explanation of how it works:
 
 ##### Injecting Context:
 * When a service A initiates a request to service B, it needs to pass along the tracing context.
@@ -126,6 +126,11 @@ Example configure Setter and Gtter as Bean
 
 ```
 
+
+
+<p align="center">
+  <img src="images/ex-context-service.png" alt="image description" width="680" height="300">
+</p>
 
 
 
